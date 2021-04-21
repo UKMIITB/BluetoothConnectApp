@@ -13,12 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BluetoothConnect">
-        <activity android:name=".UampActivity"></activity>
-        <activity android:name=".SixthActivity" />
-        <activity android:name=".FifthActivity" />
-        <activity android:name=".FourthActivity" />
         <activity android:name=".ThirdActivity" />
-        <activity android:name=".FirstActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

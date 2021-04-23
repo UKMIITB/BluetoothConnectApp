@@ -2,11 +2,15 @@ package com.example.bluetoothconnect;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,17 +21,20 @@ import java.util.List;
 
 public class MediaPlaybackService extends MediaBrowserServiceCompat {
 
-    private MediaBrowserCompat mMediaBrowser;
     private final String TAG = "TAG";
-    private MediaSessionCompat mMediaSession;
-    private ComponentName mediaButtonReceiver;
+    private Ringtone ringTone;
+    private boolean isPlaying = true;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mediaButtonReceiver = new ComponentName(getApplicationContext(), MediaButtonReceiver.class);
-        mMediaSession = new MediaSessionCompat(getApplicationContext(), "TAG", mediaButtonReceiver, null);
+        ComponentName mediaButtonReceiver = new ComponentName(getApplicationContext(), MediaButtonReceiver.class);
+        MediaSessionCompat mMediaSession = new MediaSessionCompat(getApplicationContext(), "TAG", mediaButtonReceiver, null);
         mMediaSession.setCallback(mediaSessionCallback);
+
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        ringTone = RingtoneManager.getRingtone(getApplicationContext(), notification);
+        playRingtone();
     }
 
     @Nullable
@@ -52,7 +59,16 @@ public class MediaPlaybackService extends MediaBrowserServiceCompat {
 
         @Override
         public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-            Log.d(TAG, "onMediaButtonEvent: "+mediaButtonEvent.toString());
+
+            KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+
+            if(keyEvent.getAction()==KeyEvent.ACTION_DOWN) {
+                Log.d(TAG, "onMediaButtonEvent: ");
+                if(isPlaying)
+                    pauseRingtone();
+                else
+                    playRingtone();
+            }
             return super.onMediaButtonEvent(mediaButtonEvent);
         }
 
@@ -101,4 +117,15 @@ public class MediaPlaybackService extends MediaBrowserServiceCompat {
             super.onStop();
         }
     };
+
+    private void playRingtone() {
+        ringTone.play();
+        ringTone.setLooping(true);
+        isPlaying = true;
+    }
+
+    private void pauseRingtone() {
+        ringTone.stop();
+        isPlaying = false;
+    }
 }
